@@ -1,11 +1,9 @@
 defmodule Harmony.Chat do
+  alias Harmony.Server
+
   @join_chat "JOIN_CHAT"
   @leave_chat "LEAVE_CHAT"
   @send_message "SEND_MESSAGE"
-
-  def initial_state do
-    %{users: [], messages: []}
-  end
 
   def handle_message({:text, message}, req, state) do
     %{"action" => action, "data" => data} = Poison.decode!(message)
@@ -19,28 +17,24 @@ defmodule Harmony.Chat do
     {:ok, req, state}
   end
 
-  defp handle_message(@join_chat, user, req, state) do
-    new_state = update_in(state, [:users], &(&1 ++ [user]))
+  defp handle_message(@join_chat, handle, req, state) do
+    response = Server.join(handle)
 
-    response = Poison.encode!(new_state)
-
-    {:reply, {:text, response}, req, new_state}
+    {:reply, {:text, response}, req, state}
   end
 
-  defp handle_message(@leave_chat, user, req, state) do
-    new_state = update_in(state, [:users], &(&1 -- [user]))
+  defp handle_message(@leave_chat, handle, req, state) do
+    Server.leave(handle)
 
-    response = Poison.encode!(new_state)
-
-    {:reply, {:text, response}, req, new_state}
+    {:reply, {:text, "ok"}, req, state}
   end
 
   defp handle_message(@send_message, message, req, state) do
-    new_state = update_in(state, [:messages], &(&1 ++ [message]))
+    %{"handle" => handle, "text" => text} = message
 
-    response = Poison.encode!(new_state)
+    Server.send(handle, text)
 
-    {:reply, {:text, response}, req, new_state}
+    {:reply, {:text, "ok"}, req, state}
   end
 
   defp handle_message(action, data, req, state) do

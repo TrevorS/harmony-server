@@ -10,9 +10,7 @@ defmodule Harmony.SocketHandler do
   end
 
   def websocket_init(_type, req, _opts) do
-    state = Chat.initial_state()
-
-    {:ok, req, state, @timeout}
+    {:ok, req, :ok, @timeout}
   end
 
   def websocket_handle(message, req, state) do

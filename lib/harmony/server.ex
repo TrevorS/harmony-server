@@ -4,8 +4,8 @@ defmodule Harmony.Server do
   alias Harmony.Message
   alias Harmony.ServerState
 
-  def start do
-    GenServer.start(__MODULE__, nil, name: :harmony_server)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: :harmony_server)
   end
 
   def join(handle) do
@@ -29,11 +29,17 @@ defmodule Harmony.Server do
 
     new_state = ServerState.join(state, handle, pid)
 
-    {:reply, {handle, pid}, new_state}
+    response = ServerState.to_json(new_state)
+
+    {:reply, response, new_state}
   end
 
   def handle_cast({:leave, handle}, state) do
     new_state = ServerState.leave(state, handle)
+
+    response = ServerState.to_json(new_state)
+
+    send_responses(new_state.connections, response)
 
     {:noreply, new_state}
   end
@@ -43,6 +49,16 @@ defmodule Harmony.Server do
 
     new_state = ServerState.send(state, new_message)
 
+    response = ServerState.to_json(new_state)
+
+    send_responses(new_state.connections, response)
+
     {:noreply, new_state}
+  end
+
+  defp send_responses(connections, response) do
+    Enum.each(connections, fn {_handle, connection} ->
+      Kernel.send(connection, response)
+    end)
   end
 end

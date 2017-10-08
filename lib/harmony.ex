@@ -8,7 +8,8 @@ defmodule Harmony do
       Plug.Adapters.Cowboy.child_spec(:http, Harmony.Router, [], [
         port: port(),
         dispatch: dispatch()
-      ])
+      ]),
+      Harmony.Server
     ]
 
     opts = [strategy: :one_for_one, name: Harmony.Supervisor]

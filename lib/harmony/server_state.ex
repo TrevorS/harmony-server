@@ -18,4 +18,12 @@ defmodule Harmony.ServerState do
   def send(state, message) do
     update_in(state.messages, &([message | &1]))
   end
+
+  def to_json(state) do
+    users = Map.keys(state.connections)
+
+    response = %{users: users, messages: state.messages}
+
+    Poison.encode!(response)
+  end
 end
