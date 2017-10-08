@@ -31,6 +31,8 @@ defmodule Harmony.Server do
 
     response = ServerState.to_json(new_state)
 
+    broadcast(new_state.connections, response);
+
     {:reply, response, new_state}
   end
 
@@ -39,7 +41,7 @@ defmodule Harmony.Server do
 
     response = ServerState.to_json(new_state)
 
-    send_responses(new_state.connections, response)
+    broadcast(new_state.connections, response)
 
     {:noreply, new_state}
   end
@@ -51,12 +53,12 @@ defmodule Harmony.Server do
 
     response = ServerState.to_json(new_state)
 
-    send_responses(new_state.connections, response)
+    broadcast(new_state.connections, response)
 
     {:noreply, new_state}
   end
 
-  defp send_responses(connections, response) do
+  defp broadcast(connections, response) do
     Enum.each(connections, fn {_handle, connection} ->
       Kernel.send(connection, response)
     end)
