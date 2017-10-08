@@ -4,6 +4,13 @@ defmodule Harmony.Chat do
   @join_chat "JOIN_CHAT"
   @leave_chat "LEAVE_CHAT"
   @send_message "SEND_MESSAGE"
+  @ping "PING"
+  @pong "PONG"
+  @ok "OK"
+
+  def handle_message({:text, @ping}, req, state) do
+    {:reply, {:text, @pong}, req, state}
+  end
 
   def handle_message({:text, message}, req, state) do
     %{"action" => action, "data" => data} = Poison.decode!(message)
@@ -26,7 +33,7 @@ defmodule Harmony.Chat do
   defp handle_message(@leave_chat, handle, req, state) do
     Server.leave(handle)
 
-    {:reply, {:text, "ok"}, req, state}
+    {:reply, {:text, @ok}, req, state}
   end
 
   defp handle_message(@send_message, message, req, state) do
@@ -34,7 +41,7 @@ defmodule Harmony.Chat do
 
     Server.send(handle, text)
 
-    {:reply, {:text, "ok"}, req, state}
+    {:reply, {:text, @ok}, req, state}
   end
 
   defp handle_message(action, data, req, state) do
