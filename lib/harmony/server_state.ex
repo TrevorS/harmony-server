@@ -24,7 +24,9 @@ defmodule Harmony.ServerState do
       %{handle: handle}
     end)
 
-    response = %{users: users, messages: state.messages}
+    messages = Enum.reverse(state.messages)
+
+    response = %{users: users, messages: messages}
 
     Poison.encode!(response)
   end
