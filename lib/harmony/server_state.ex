@@ -20,7 +20,9 @@ defmodule Harmony.ServerState do
   end
 
   def to_json(state) do
-    users = Map.keys(state.connections)
+    users = Enum.map(state.connections, fn {handle, _pid} ->
+      %{handle: handle}
+    end)
 
     response = %{users: users, messages: state.messages}
 
